@@ -1,0 +1,41 @@
+.error404 {
+  color: #51ab8a;
+  font-family: var(--fontFamilyLily);
+  text-shadow: 4px 4px 2px rgba(0, 0, 0);
+}
+
+/* Parpadeo */
+
+@keyframes flashing {
+  0% {
+    color: #808080;
+  }
+
+  25% {
+    color: #51ab8a;
+  }
+
+  50% {
+    color: #808080;
+  }
+
+  75% {
+    color: #51ab8a;
+  }
+
+  100% {
+    color: #808080;
+  }
+}
+
+.flashing {
+  animation: flashing 6s forwards;
+  /* Duración y repetición de la animación */
+}
+
+/*Estilo palabra Error*/
+
+.text {
+  color: black;
+  font-family: var(--abel), sans-serif;
+}
