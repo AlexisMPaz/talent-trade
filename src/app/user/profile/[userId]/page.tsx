@@ -2,7 +2,7 @@
 
 import { useSpecialties } from '@/context/specialties/specialties';
 import { useUser } from '@/context/user/userContext';
-import { ResponseGetUserById } from '@/types/user.type';
+import { ResponseGetUserById, userRating } from '@/types/user.type';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -33,7 +33,17 @@ export default function Page() {
     fetchUserData();
   }, [userId]);
 
-  const rating = 4; // LÓGICA PARA EL RATING
+  const calculateAverageRating = (userRatings: userRating[]): number => {
+    if (!userRatings) return 0;
+    if (userRatings.length === 0) return 0;
+
+    const sum = userRatings.reduce((acc, curr) => acc + curr.rating, 0);
+    return sum / userRatings.length;
+  };
+  const averageRating: number = calculateAverageRating(
+    userData?.userRatings as userRating[]
+  );
+
   const isAContact = userData?.email && userData?.phoneNumber;
 
   if (userData)
@@ -45,9 +55,9 @@ export default function Page() {
             <Image
               src={userData.banner}
               alt="Picture"
-              width="160"
-              height="90"
-              className="object-cover rounded-t-xl mb-8 w-full max-h-52"
+              width="1584"
+              height="396"
+              className="object-center rounded-t-xl mb-8 w-full max-h-52"
             />
             <Image
               src={userData.avatar}
@@ -63,52 +73,61 @@ export default function Page() {
               {userData.name}
             </h2>
             <div className="flex items-center mb-4">
-              {[...Array(5)].map((star, index) => {
-                const ratingValue = index + 1;
-                return (
-                  <FaStar
-                    key={index}
-                    className={`text-2xl ${ratingValue <= rating ? 'text-yellow-500' : 'text-gray-300'}`}
-                  />
-                );
-              })}
-              <p className="text-gray-500 ml-2 text-lg font-medium">
-                {rating.toFixed(1)}
-              </p>{' '}
-              {/* Muestra el promedio numérico */}
+              {userData.userRatings.length > 0 ? (
+                <>
+                  {[...Array(5)].map((_, index) => {
+                    return (
+                      <FaStar
+                        key={index}
+                        className={`text-2xl ${index + 1 <= averageRating ? 'text-yellow-500' : 'text-gray-300'}`}
+                      />
+                    );
+                  })}
+                  <p className="text-gray-500 ml-2 text-lg font-medium">
+                    {averageRating}
+                  </p>
+                </>
+              ) : (
+                <div className="text-gray-600">No ratings yet!</div>
+              )}
             </div>
             {isAContact ? (
               <div className="flex flex-col gap-y-1 sm:flex-row sm:items-center gap-x-3 mb-4">
                 <a
-                  href="tel:+54 9 381 676-9722"
+                  href={`tel:${userData.phoneNumber}`}
                   className="flex gap-1 items-center"
                 >
                   <FaPhoneAlt className="text-gray-700 text-sm" />
-                  <p className="text-gray-600 text-sm">+54 9 381 676-9722</p>
+                  {/* <p className="text-gray-600 text-sm">+54 9 381 676-9722</p> */}
+                  <p className="text-gray-600 text-sm">
+                    {userData.phoneNumber}
+                  </p>
                 </a>
                 <a
-                  href="mailto:vassarottowen@gmail.com"
+                  href={`mailto:${userData.email}`}
                   className="flex gap-1 items-center"
                 >
                   <IoMail className="text-gray-700 text-sm" />
-                  <p className="text-gray-600 text-sm">
-                    vassarottowen@gmail.com
-                  </p>
+                  <p className="text-gray-600 text-sm">{userData.email}</p>
                 </a>
               </div>
             ) : (
               <p className="mb-2 text-gray-700 text-sm">
-                Connect with <span className="font-medium">Owen</span> to access
+                Connect with{' '}
+                <span className="font-medium">{userData.name}</span> to access
                 contact information and learn more. Everyone is welcome!
               </p>
             )}
 
             {/* edit profile or connect button */}
             {userData.isOwnProfile ? (
-              <Link href={`/user/profile/${userId}/update`}  className="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-3 py-2 rounded-sm flex items-center gap-x-2 w-fit mt-6">
-              Edit Profile
-              <MdModeEditOutline />
-            </Link>
+              <Link
+                href={`/user/profile/${userId}/update`}
+                className="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-3 py-2 rounded-sm flex items-center gap-x-2 w-fit mt-6"
+              >
+                Edit Profile
+                <MdModeEditOutline />
+              </Link>
             ) : (
               <button className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-2 rounded-sm mt-3">
                 Connect
@@ -153,7 +172,7 @@ export default function Page() {
             My Interests
           </h2>
           <div className="flex flex-wrap gap-3 items-center text-center w-full">
-          {userData.interests.map((specialty) => (
+            {userData.interests.map((specialty) => (
               <div
                 key={specialty._id}
                 className="border border-gray-500 text-gray-700 rounded-2xl p-2 text-center text-sm font-medium shadow"
