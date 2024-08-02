@@ -9,6 +9,8 @@ import React, {
 import { AxiosError, isAxiosError } from 'axios';
 import api from '@/lib/axios';
 import { User, Respuesta } from '@/types/user.type';
+import { deleteToken } from '@/utils/deletetoken';
+import path from 'path';
 
 export type UserRegistrationForm = {
   name: string;
@@ -97,14 +99,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const deleteCookie = (name: string) => {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-  };
-
   const logout = async (): Promise<ResponseMessage> => {
     try {
       const { data } = await api.get<ResponseMessage>('api/auth/logout');
-      deleteCookie('token');
+      deleteToken('token');
       setUser(null);
       return data;
     } catch (error) {
